@@ -39,25 +39,28 @@ namespace WebClientAutomator
             var methodReturnType = GetMethodReturnType(returnType);
             methodModel.ReturnType = methodReturnType;
 
-            var primitiveType = GetPrimitiveTypeByMethodReturnType(methodReturnType, returnType);
-            methodModel.PrimitiveType = primitiveType;
-
-            if (primitiveType == null)
+            if (methodReturnType != MethodReturnType.Void)
             {
-              if (methodReturnType == MethodReturnType.TaskT || methodReturnType == MethodReturnType.IEnumerableT)
-              {
-                var taskTType = returnType.GenericTypeArguments.First();
+              var primitiveType = GetPrimitiveTypeByMethodReturnType(methodReturnType, returnType);
+              methodModel.PrimitiveType = primitiveType;
 
-                if (taskTType.IsPrimitiveType())
-                  methodModel.PrimitiveType = GetPrimitiveType(taskTType.Name);
-                else if(taskTType.IsHttpResult())
-                  methodModel.PrimitiveType = PrimitiveType.String;
-                else 
-                  methodModel.ComplexType = GetComplexType(taskTType);
-              }
-              else
+              if (primitiveType == null)
               {
-                methodModel.ComplexType = GetComplexType(returnType);
+                if (methodReturnType == MethodReturnType.TaskT || methodReturnType == MethodReturnType.IEnumerableT)
+                {
+                  var taskTType = returnType.GenericTypeArguments.First();
+
+                  if (taskTType.IsPrimitiveType())
+                    methodModel.PrimitiveType = GetPrimitiveType(taskTType.Name);
+                  else if (taskTType.IsHttpResult())
+                    methodModel.PrimitiveType = PrimitiveType.String;
+                  else
+                    methodModel.ComplexType = GetComplexType(taskTType);
+                }
+                else
+                {
+                  methodModel.ComplexType = GetComplexType(returnType);
+                }
               }
             }
 

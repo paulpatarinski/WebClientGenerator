@@ -37,12 +37,43 @@
 					{
 						
 					}		
-			<#}#>
+			<#
+			}#>
 	
 		}
 
 	<#
 	}
+
+	var methods = data.Controllers.SelectMany(x => x.Methods).ToList();
+  var complexReturnTypes = methods.Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+
+	foreach(var complexType in complexReturnTypes)
+	{
+
+		#>
+				public class <#=complexType.Name #>
+				{
+
+				<# 
+
+				foreach(var property in complexType.Properties)
+				{
+					var propertyType = SchemaHelper.GetPropertyTypeString(property);
+				#>
+
+				public <#= propertyType#> <#= property.Name #> { get; set; }
+
+
+				<#
+				}
+
+				#>
+				}
+
+		<#
+	}
+
 #>
 }
 
@@ -146,37 +177,17 @@ public WebApiModel GetWebApiSchema()
   }
 
 
-  public static class SchemaHelper
+ public static class SchemaHelper
   {
     public static string GetReturnTypeString(Method method)
     {
-      var result = string.Empty;
-
       switch (method.ReturnType)
       {
         case MethodReturnType.Void:
           return "void";
         case MethodReturnType.Primitive:
         {
-          switch (method.PrimitiveType)
-          {
-            case PrimitiveType.Bool:
-              return "bool";
-            case PrimitiveType.Char:
-              return "char";
-            case PrimitiveType.DateTime:
-              return "DateTime";
-            case PrimitiveType.Double:
-              return "double";
-            case PrimitiveType.Int:
-              return "int";
-            case PrimitiveType.String:
-              return "string";
-            case PrimitiveType.Unsupported:
-              return "UNKNOWN";
-            default:
-              return "UNKNOWN";
-          }
+          return GetPrimitiveTypeStringByPrimitiveType((PrimitiveType) method.PrimitiveType);
         }
         case MethodReturnType.HttpResult:
           return "string";
@@ -186,31 +197,110 @@ public WebApiModel GetWebApiSchema()
           return "async Task";
         case MethodReturnType.IEnumerableT:
         {
-          if(method.PrimitiveType != null)
-            return string.Format("IEnumerable<{0}>", GetReturnTypeString(new Method{ComplexType = method.ComplexType, Name = method.Name, PrimitiveType = method.PrimitiveType, ReturnType = MethodReturnType.Primitive}));
+          if (method.PrimitiveType != null)
+            return string.Format("IEnumerable<{0}>",
+              GetReturnTypeString(new Method
+              {
+                ComplexType = method.ComplexType,
+                Name = method.Name,
+                PrimitiveType = method.PrimitiveType,
+                ReturnType = MethodReturnType.Primitive
+              }));
 
           return string.Format("IEnumerable<{0}>", method.ComplexType.Name);
         }
         case MethodReturnType.TaskT:
-				 {
-          if(method.PrimitiveType != null)
-            return string.Format("async Task<{0}>", GetReturnTypeString(new Method{ComplexType = method.ComplexType, Name = method.Name, PrimitiveType = method.PrimitiveType, ReturnType = MethodReturnType.Primitive}));
+        {
+          if (method.PrimitiveType != null)
+            return string.Format("async Task<{0}>",
+              GetReturnTypeString(new Method
+              {
+                ComplexType = method.ComplexType,
+                Name = method.Name,
+                PrimitiveType = method.PrimitiveType,
+                ReturnType = MethodReturnType.Primitive
+              }));
 
           return string.Format("async Task<{0}>", method.ComplexType.Name);
         }
-				case MethodReturnType.ComplexType:
-					return method.ComplexType.Name;
-				default:
-					return "UNKNOWN";
+        case MethodReturnType.ComplexType:
+          return method.ComplexType.Name;
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+    public static string GetPropertyTypeString(Property property)
+    {
+      switch (property.PropertyType)
+      {
+        case PropertyType.Primitive:
+        {
+          return GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)property.PrimitiveType);
+        }
+        case PropertyType.Complex:
+        {
+          return property.ComplexType.Name;
+        }
+        case PropertyType.IEnumerable:
+        {
+          return "IEnumerable";
+        }
+        case PropertyType.IEnumerableT:
+        {
+          if (property.PrimitiveType != null)
+            return string.Format("IEnumerable<{0}>",GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)property.PrimitiveType));
+
+          return string.Format("IEnumerable<{0}>", property.ComplexType.Name);
+        }
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+  public static string GetPrimitiveTypeStringByPrimitiveType(PrimitiveType primitiveType)
+    {
+      switch (primitiveType)
+      {
+        case PrimitiveType.Bool:
+          return "bool";
+        case PrimitiveType.Char:
+          return "char";
+        case PrimitiveType.DateTime:
+          return "DateTime";
+        case PrimitiveType.Double:
+          return "double";
+        case PrimitiveType.Int:
+          return "int";
+        case PrimitiveType.String:
+          return "string";
+        case PrimitiveType.Unsupported:
+          return "UNKNOWN";
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+  public static string GetClientClassName(string controllerName)
+    {
+      var controllers = new List<Controller>();
+
+      var methods = controllers.SelectMany(x => x.Methods).ToList();
+      var complexReturnTypes = methods.Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+
+      foreach (var complexReturnType in complexReturnTypes)
+      {
+        //public class 
+
+        foreach (var property in complexReturnType.Properties)
+        {
+          
+        }
       }
 
-      return result;
-    }
 
-    public static string GetClientClassName(string controllerName)
-    {
       return controllerName.Replace("Controller", "Manager");
     }
-}
+  }
 
 #>

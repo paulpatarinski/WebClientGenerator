@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace WebClientAutomator.Models
 {
@@ -71,33 +72,13 @@ namespace WebClientAutomator.Models
   {
     public static string GetReturnTypeString(Method method)
     {
-      var result = string.Empty;
-
       switch (method.ReturnType)
       {
         case MethodReturnType.Void:
           return "void";
         case MethodReturnType.Primitive:
         {
-          switch (method.PrimitiveType)
-          {
-            case PrimitiveType.Bool:
-              return "bool";
-            case PrimitiveType.Char:
-              return "char";
-            case PrimitiveType.DateTime:
-              return "DateTime";
-            case PrimitiveType.Double:
-              return "double";
-            case PrimitiveType.Int:
-              return "int";
-            case PrimitiveType.String:
-              return "string";
-            case PrimitiveType.Unsupported:
-              return "UNKNOWN";
-            default:
-              return "UNKNOWN";
-          }
+          return GetPrimitiveTypeStringByPrimitiveType((PrimitiveType) method.PrimitiveType);
         }
         case MethodReturnType.HttpResult:
           return "string";
@@ -138,12 +119,77 @@ namespace WebClientAutomator.Models
         default:
           return "UNKNOWN";
       }
-
-      return result;
     }
 
-    public static string GetClientClassName(string controllerName)
+    public static string GetPropertyTypeString(Property property)
     {
+      switch (property.PropertyType)
+      {
+        case PropertyType.Primitive:
+        {
+          return GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)property.PrimitiveType);
+        }
+        case PropertyType.Complex:
+        {
+          return property.ComplexType.Name;
+        }
+        case PropertyType.IEnumerable:
+        {
+          return "IEnumerable";
+        }
+        case PropertyType.IEnumerableT:
+        {
+          if (property.PrimitiveType != null)
+            return string.Format("IEnumerable<{0}>",GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)property.PrimitiveType));
+
+          return string.Format("IEnumerable<{0}>", property.ComplexType.Name);
+        }
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+  public static string GetPrimitiveTypeStringByPrimitiveType(PrimitiveType primitiveType)
+    {
+      switch (primitiveType)
+      {
+        case PrimitiveType.Bool:
+          return "bool";
+        case PrimitiveType.Char:
+          return "char";
+        case PrimitiveType.DateTime:
+          return "DateTime";
+        case PrimitiveType.Double:
+          return "double";
+        case PrimitiveType.Int:
+          return "int";
+        case PrimitiveType.String:
+          return "string";
+        case PrimitiveType.Unsupported:
+          return "UNKNOWN";
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+  public static string GetClientClassName(string controllerName)
+    {
+      var controllers = new List<Controller>();
+
+      var methods = controllers.SelectMany(x => x.Methods).ToList();
+      var complexReturnTypes = methods.Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+
+      foreach (var complexReturnType in complexReturnTypes)
+      {
+        //public class 
+
+        foreach (var property in complexReturnType.Properties)
+        {
+          
+        }
+      }
+
+
       return controllerName.Replace("Controller", "Manager");
     }
   }

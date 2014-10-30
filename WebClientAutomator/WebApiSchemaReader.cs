@@ -50,6 +50,8 @@ namespace WebClientAutomator
 
                 if (taskTType.IsPrimitiveType())
                   methodModel.PrimitiveType = GetPrimitiveType(taskTType.Name);
+                else if(taskTType.IsHttpResult())
+                  methodModel.PrimitiveType = PrimitiveType.String;
                 else 
                   methodModel.ComplexType = GetComplexType(taskTType);
               }
@@ -116,7 +118,7 @@ namespace WebClientAutomator
           }
           else
           {
-            methodReturnType = MethodReturnType.Complex;
+            methodReturnType = MethodReturnType.ComplexType;
           }
         }
 
@@ -127,7 +129,7 @@ namespace WebClientAutomator
       public
     ComplexType GetComplexType(Type type)
       {
-        var complexType = new ComplexType{Properties = new List<Property>()};
+        var complexType = new ComplexType{Properties = new List<Property>(), Name = type.Name};
 
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 

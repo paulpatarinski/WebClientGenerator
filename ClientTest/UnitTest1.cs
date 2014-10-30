@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Threading.Tasks;
-using ClientTest.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 
@@ -16,6 +13,8 @@ namespace ClientTest
     [TestMethod]
     public async Task TestMethod1()
     {
+      var result = string.Empty;
+
       using (var client = new HttpClient())
       {
         client.BaseAddress = new Uri("http://localhost:49515/");
@@ -27,13 +26,11 @@ namespace ClientTest
         
         if (response.IsSuccessStatusCode)
         {
-          var typesAsString = await response.Content.ReadAsStringAsync();
-
-          var types = JsonConvert.DeserializeObject<WebApiModel>(typesAsString);
-
-          var hello = "";
+          result = await response.Content.ReadAsStringAsync();
         }
       }
+
+      Assert.IsNotNull(result);
     }
   }
 }

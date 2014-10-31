@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace WebClientAutomator.Models
@@ -20,6 +22,7 @@ namespace WebClientAutomator.Models
     public MethodReturnType ReturnType { get; set; }
     public PrimitiveType? PrimitiveType { get; set; }
     public ComplexType ComplexType { get; set; }
+    public List<Property> Parameters { get; set; } 
   }
 
   public class ComplexType
@@ -118,6 +121,35 @@ namespace WebClientAutomator.Models
           return method.ComplexType.Name;
         default:
           return "UNKNOWN";
+      }
+    }
+
+    public static string GetParametersString(List<Property> paramaters)
+    {
+      var parametersAsStringList = new List<string>();
+
+      foreach (var paramater in paramaters)
+      {
+        var typeAsString = paramater.PrimitiveType != null
+          ? GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)paramater.PrimitiveType)
+          : paramater.ComplexType.Name;
+
+        parametersAsStringList.Add(string.Format("{0} {1}", typeAsString, paramater.Name));
+      }
+
+      return !parametersAsStringList.Any() ? string.Empty : string.Join(",", parametersAsStringList);
+    }
+
+    public static string GetClassIniatializerByReturnType(MethodReturnType returnType)
+    {
+      switch (returnType)
+      {
+          case MethodReturnType.Void:
+          return null;
+          case MethodReturnType.IEnumerable:
+          return "new List()";
+
+
       }
     }
 

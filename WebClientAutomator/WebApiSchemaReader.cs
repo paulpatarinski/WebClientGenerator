@@ -34,6 +34,8 @@ namespace WebClientAutomator
         {
           var methodModel = new Method {Name = methodInfo.Name};
 
+          methodModel.Parameters = GetMethodParameters(methodInfo.GetParameters());
+
           var returnType = methodInfo.ReturnType;
 
           var methodReturnType = GetMethodReturnType(returnType);
@@ -72,7 +74,52 @@ namespace WebClientAutomator
 
       return result;
     }
-  
+
+    private List<Property> GetMethodParameters(IEnumerable<ParameterInfo> parameterInfos)
+    {
+      return parameterInfos.Select(parameterInfo => GetProperty(parameterInfo.ParameterType, parameterInfo.Name)).ToList();
+    }
+
+    public Property GetProperty(Type type, string propertyName)
+    {
+      var property = new Property { Name = propertyName};
+
+      if (type.IsPrimitiveType())
+      {
+        property.PropertyType = PropertyType.Primitive;
+        property.PrimitiveType = GetPrimitiveType(type.Name);
+      }
+      else
+      {
+        if (type.IsIEnumerable())
+        {
+          property.PropertyType = PropertyType.IEnumerable;
+          var tType = type.GenericTypeArguments.FirstOrDefault();
+
+          if (tType != null)
+          {
+            property.PropertyType = PropertyType.IEnumerableT;
+
+            if (tType.IsPrimitiveType())
+            {
+              property.PrimitiveType = GetPrimitiveType(tType.Name);
+            }
+            else
+            {
+              property.ComplexType = GetComplexType(tType);
+            }
+          }
+        }
+        else
+        {
+          property.PropertyType = PropertyType.Complex;
+          property.ComplexType = GetComplexType(type);
+        }
+      }
+
+      return property;
+    }
+
     public MethodReturnType GetMethodReturnType(Type returnType)
     {
       MethodReturnType methodReturnType;
@@ -120,42 +167,7 @@ namespace WebClientAutomator
 
       foreach (var propertyInfo in properties)
       {
-        var property = new Property {Name = propertyInfo.Name};
-
-        if (propertyInfo.PropertyType.IsPrimitiveType())
-        {
-          property.PropertyType = PropertyType.Primitive;
-          property.PrimitiveType = GetPrimitiveType(propertyInfo.PropertyType.Name);
-        }
-        else
-        {
-          if (propertyInfo.PropertyType.IsIEnumerable())
-          {
-            property.PropertyType = PropertyType.IEnumerable;
-            var tType = propertyInfo.PropertyType.GenericTypeArguments.FirstOrDefault();
-
-            if (tType != null)
-            {
-              property.PropertyType = PropertyType.IEnumerableT;
-
-              if (tType.IsPrimitiveType())
-              {
-                property.PrimitiveType = GetPrimitiveType(tType.Name);
-              }
-              else
-              {
-                property.ComplexType = GetComplexType(tType);
-              }
-            }
-          }
-          else
-          {
-            property.PropertyType = PropertyType.Complex;
-            property.ComplexType = GetComplexType(propertyInfo.PropertyType);
-          }
-        }
-
-        complexType.Properties.Add(property);
+        complexType.Properties.Add(GetProperty(propertyInfo.PropertyType, propertyInfo.Name));
       }
 
       return complexType;
@@ -172,6 +184,9 @@ namespace WebClientAutomator
         case "DateTime":
           return PrimitiveType.DateTime;
         case "int":
+        case "int16":
+        case "int32":
+        case "int64":
           return PrimitiveType.Int;
         case "boolean":
           return PrimitiveType.Bool;

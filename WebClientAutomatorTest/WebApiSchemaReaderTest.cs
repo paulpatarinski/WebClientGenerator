@@ -34,7 +34,9 @@ namespace WebClientAutomatorTest
     public void GetWebApiSchema_ShouldReturnCorrectNumberOfMethods()
     {
       var webApiSchema = _webApiSchemaReader.GetWebApiSchema(_webApiAssembly);
-      
+      var methods = webApiSchema.Controllers.SelectMany(x => x.Methods).ToList();
+      var parameterComplexTypes = methods.SelectMany(x => x.Parameters).Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+
       //Account Controller
       var accountController = webApiSchema.Controllers.FirstOrDefault(x => x.Name.Equals("AccountController"));
 

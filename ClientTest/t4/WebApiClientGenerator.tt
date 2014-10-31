@@ -32,10 +32,18 @@
 			<# foreach(var method in controller.Methods)
 			{
 				var returnType = SchemaHelper.GetReturnTypeString(method);
+				var parameters = SchemaHelper.GetParametersString(method.Parameters);
 			#>
-					public <#=returnType#> <#=method.Name#>()
+					public <#=returnType#> <#=method.Name#>(<#=parameters#>)
 					{
+						<#if(method.ReturnType != MethodReturnType.Void)
+						{#>
+
+						var result = new <#=returnType#>();
 						
+						return result;
+
+						<#}#>
 					}		
 			<#
 			}#>
@@ -46,9 +54,14 @@
 	}
 
 	var methods = data.Controllers.SelectMany(x => x.Methods).ToList();
+	var parameterComplexTypes = methods.SelectMany(x => x.Parameters).Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
   var complexReturnTypes = methods.Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+	
+	var complexTypes = new List<ComplexType>();
+	complexTypes.AddRange(parameterComplexTypes);
+	complexTypes.AddRange(complexReturnTypes);
 
-	foreach(var complexType in complexReturnTypes)
+	foreach(var complexType in complexTypes)
 	{
 
 		#>
@@ -129,6 +142,7 @@ public WebApiModel GetWebApiSchema()
     public MethodReturnType ReturnType { get; set; }
     public PrimitiveType? PrimitiveType { get; set; }
     public ComplexType ComplexType { get; set; }
+    public List<Property> Parameters { get; set; } 
   }
 
   public class ComplexType
@@ -228,6 +242,22 @@ public WebApiModel GetWebApiSchema()
         default:
           return "UNKNOWN";
       }
+    }
+
+		public static string GetParametersString(List<Property> paramaters)
+    {
+      var parametersAsStringList = new List<string>();
+
+      foreach (var paramater in paramaters)
+      {
+        var typeAsString = paramater.PrimitiveType != null
+          ? GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)paramater.PrimitiveType)
+          : paramater.ComplexType.Name;
+
+        parametersAsStringList.Add(string.Format("{0} {1}", typeAsString, paramater.Name));
+      }
+
+      return !parametersAsStringList.Any() ? string.Empty : string.Join(",", parametersAsStringList);
     }
 
     public static string GetPropertyTypeString(Property property)

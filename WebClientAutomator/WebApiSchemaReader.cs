@@ -72,27 +72,7 @@ namespace WebClientAutomator
 
       return result;
     }
-
-    private PrimitiveType? GetPrimitiveTypeByMethodReturnType(MethodReturnType methodReturnType, Type returnType)
-    {
-      switch (methodReturnType)
-      {
-        case MethodReturnType.Primitive:
-        {
-          return GetPrimitiveType(returnType.Name);
-        }
-          //This is a special case. You would want to deserialize HTTPResult into a string
-        case MethodReturnType.HttpResult:
-        case MethodReturnType.Task:
-        case MethodReturnType.IEnumerable:
-        {
-          return PrimitiveType.String;
-        }
-        default:
-          return null;
-      }
-    }
-
+  
     public MethodReturnType GetMethodReturnType(Type returnType)
     {
       MethodReturnType methodReturnType;
@@ -201,5 +181,26 @@ namespace WebClientAutomator
           return PrimitiveType.Unsupported;
       }
     }
+
+    private PrimitiveType? GetPrimitiveTypeByMethodReturnType(MethodReturnType methodReturnType, Type returnType)
+    {
+      switch (methodReturnType)
+      {
+        case MethodReturnType.Primitive:
+          {
+            return GetPrimitiveType(returnType.Name);
+          }
+        //This is a special case. You would want to deserialize HTTPResult into a string
+        case MethodReturnType.HttpResult:
+        case MethodReturnType.Task:
+        case MethodReturnType.IEnumerable:
+          {
+            return PrimitiveType.String;
+          }
+        default:
+          return null;
+      }
+    }
+
   }
 }

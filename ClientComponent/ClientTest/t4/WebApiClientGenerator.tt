@@ -1,0 +1,435 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Net.Http" #>
+<#@ assembly name="C:\Users\Paul\OneDrive\WIP\WebClientAutomater\packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Net.Http" #>
+<#@ import namespace="System.Net.Http.Headers" #>
+<#@ import namespace="System.Threading.Tasks" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Newtonsoft.Json" #>
+<#@ output extension=".cs" #>
+
+<#
+	//CONFIG
+	var webApiBaseUrl = "http://localhost:49515/api/";
+	var data = GetWebApiSchema(webApiBaseUrl); 
+
+	#>
+	using System;
+	using System.Collections.Generic;
+	using System.Net.Http;
+	using System.Net.Http.Headers;
+	using System.Threading.Tasks;
+	using Newtonsoft.Json;
+
+	namespace WebApiClient
+	{
+		public class HttpClientService
+		{
+      private const string BASE_URL = "<#=webApiBaseUrl #>";
+
+			public static async Task<string> GetAsync(string controllerName, string actionName)
+			{
+				var result = string.Empty;
+
+				using (var client = new HttpClient())
+				{
+					client.BaseAddress = new Uri(string.Format(BASE_URL + "{0}/", controllerName));
+					client.DefaultRequestHeaders.Accept.Clear();
+					client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+					var response = await client.GetAsync(actionName);
+
+					if (response.IsSuccessStatusCode)
+					{
+						result = await response.Content.ReadAsStringAsync();
+					}
+				}
+
+				return result;
+			}
+		}
+
+	<#
+	foreach(var controller in data.Controllers)
+	{
+		var clientClassName = SchemaHelper.GetClientClassName(controller.Name);
+	#>
+		public class <#=clientClassName#>
+		{
+
+			<# foreach(var method in controller.Methods)
+			{
+				var returnType = SchemaHelper.GetReturnTypeString(method, true);
+				var returnTypeNoPrefix = SchemaHelper.GetReturnTypeString(method);
+				var parameters = SchemaHelper.GetParametersString(method.Parameters);
+			#>
+					public async <#=returnType#> <#=method.Name#>(<#=parameters#>)
+					{
+						<#if(method.ReturnType != MethodReturnType.Void)
+						{#>
+
+						var stringResult = await HttpClientService.GetAsync("<#=controller.Name#>", "<#=method.Name#>");
+
+						return JsonConvert.DeserializeObject<<#=returnTypeNoPrefix#>>(stringResult);
+						
+
+						<#}#>
+					}		
+			<#
+			}#>
+	
+		}
+
+	<#
+	}
+
+	var methods = data.Controllers.SelectMany(x => x.Methods).ToList();
+	var parameterComplexTypes = methods.SelectMany(x => x.Parameters).Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+  var complexReturnTypes = methods.Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+	
+	var complexTypes = new List<ComplexType>();
+	complexTypes.AddRange(parameterComplexTypes);
+	complexTypes.AddRange(complexReturnTypes);
+
+	foreach(var complexType in complexTypes)
+	{
+
+		#>
+				public class <#=complexType.Name #>
+				{
+
+				<# 
+
+				foreach(var property in complexType.Properties)
+				{
+					var propertyType = SchemaHelper.GetPropertyTypeString(property);
+				#>
+
+				public <#= propertyType#> <#= property.Name #> { get; set; }
+
+
+				<#
+				}
+
+				#>
+				}
+
+		<#
+	}
+
+#>
+}
+
+<#+
+
+
+
+	public WebApiModel GetWebApiSchema(string baseUrl)
+	{
+		WebApiModel result = null;
+
+		try
+		{
+			var resultTask = GetAsync(baseUrl, "WebApiSchema", "Schema");
+		
+			resultTask.Wait();
+
+			result = JsonConvert.DeserializeObject<WebApiModel>(resultTask.Result);
+
+		}
+		catch(Exception ex)
+		{
+			throw new Exception("Error retrieving the Web Api schema",ex);
+		}
+  
+		return result;
+	}
+
+	public async Task<string> GetAsync(string baseUrl, string controllerName, string actionName)
+  {
+    var result = string.Empty;
+
+    using (var client = new HttpClient())
+    {
+      client.BaseAddress = new Uri(string.Format(baseUrl + "{0}/", controllerName));
+      client.DefaultRequestHeaders.Accept.Clear();
+      client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+      var response = await client.GetAsync(actionName);
+
+      if (response.IsSuccessStatusCode)
+      {
+        result = await response.Content.ReadAsStringAsync();
+      }
+    }
+
+    return result;
+  }
+
+  public class WebApiModel
+  {
+    public List<Controller> Controllers { get; set; }
+  }
+
+  public class Controller
+  {
+    public string Name { get; set; }
+    public List<Method> Methods { get; set; }
+  }
+
+  public class Method
+  {
+    public string Name { get; set; }
+    public MethodReturnType ReturnType { get; set; }
+    public PrimitiveType? PrimitiveType { get; set; }
+    public ComplexType ComplexType { get; set; }
+    public List<Property> Parameters { get; set; } 
+  }
+
+  public class ComplexType
+  {
+    public string Name { get; set; }
+    public List<Property> Properties { get; set; }
+  }
+
+  public class Property
+  {
+    public string Name { get; set; }
+    public PropertyType? PropertyType { get; set; }
+    public PrimitiveType? PrimitiveType { get; set; }
+    public ComplexType ComplexType { get; set; }
+  }
+
+  public enum PrimitiveType
+  {
+    String,
+    Int,
+    Double,
+    DateTime,
+    Bool,
+    Char,
+    Unsupported
+  }
+
+  public enum PropertyType
+  {
+    Primitive,
+    Complex,
+    IEnumerable,
+    IEnumerableT
+  }
+
+  public enum MethodReturnType
+  {
+    Void,
+    Primitive,
+    ComplexType,
+    Task,
+    TaskT,
+    IEnumerable,
+    IEnumerableT,
+    HttpResult
+  }
+
+
+ public static class SchemaHelper
+  {
+      public static string GetReturnTypeString(Method method, bool applyPrefix = false)
+    {
+      switch (method.ReturnType)
+      {
+        case MethodReturnType.Void:
+          return "Task";
+        case MethodReturnType.Primitive:
+        {
+				  if(applyPrefix)
+						return string.Format("Task<{0}>", GetPrimitiveTypeStringByPrimitiveType((PrimitiveType) method.PrimitiveType));
+						
+          return GetPrimitiveTypeStringByPrimitiveType((PrimitiveType) method.PrimitiveType);
+        }
+        case MethodReturnType.HttpResult:
+				{
+					if(applyPrefix)
+						return "Task<string>";
+
+					return "string";
+				}
+        case MethodReturnType.IEnumerable:
+				{
+					if(applyPrefix)
+						return "Task<IEnumerable>";
+
+          return "IEnumerable";
+				}
+        case MethodReturnType.Task:
+        {
+          if(applyPrefix)
+            return "Task";
+
+          return string.Empty;
+        }
+        case MethodReturnType.IEnumerableT:
+        {
+					if(applyPrefix)
+					{
+						 if (method.PrimitiveType != null)
+							return string.Format("Task<IEnumerable<{0}>>",
+								GetReturnTypeString(new Method
+								{
+									ComplexType = method.ComplexType,
+									Name = method.Name,
+									PrimitiveType = method.PrimitiveType,
+									ReturnType = MethodReturnType.Primitive
+								}));
+
+						return string.Format("Task<IEnumerable<{0}>>", method.ComplexType.Name);
+					}
+
+          if (method.PrimitiveType != null)
+            return string.Format("IEnumerable<{0}>",
+              GetReturnTypeString(new Method
+              {
+                ComplexType = method.ComplexType,
+                Name = method.Name,
+                PrimitiveType = method.PrimitiveType,
+                ReturnType = MethodReturnType.Primitive
+              }));
+
+          return string.Format("IEnumerable<{0}>", method.ComplexType.Name);
+        }
+        case MethodReturnType.TaskT:
+        {
+          if (applyPrefix)
+          {
+            if (method.PrimitiveType != null)
+              return string.Format("Task<{0}>",
+                GetReturnTypeString(new Method
+                {
+                  ComplexType = method.ComplexType,
+                  Name = method.Name,
+                  PrimitiveType = method.PrimitiveType,
+                  ReturnType = MethodReturnType.Primitive
+                }));
+
+            return string.Format("Task<{0}>", method.ComplexType.Name);
+          }
+
+          if (method.PrimitiveType != null)
+            return GetReturnTypeString(new Method
+            {
+              ComplexType = method.ComplexType,
+              Name = method.Name,
+              PrimitiveType = method.PrimitiveType,
+              ReturnType = MethodReturnType.Primitive
+            });
+
+          return method.ComplexType.Name;
+        }
+        case MethodReturnType.ComplexType:
+				{
+					if(applyPrefix)
+					{
+	          return string.Format("Task<{0}>",method.ComplexType.Name);
+					}
+
+          return method.ComplexType.Name;
+				}
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+		public static string GetParametersString(List<Property> paramaters)
+    {
+      var parametersAsStringList = new List<string>();
+
+      foreach (var paramater in paramaters)
+      {
+        var typeAsString = paramater.PrimitiveType != null
+          ? GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)paramater.PrimitiveType)
+          : paramater.ComplexType.Name;
+
+        parametersAsStringList.Add(string.Format("{0} {1}", typeAsString, paramater.Name));
+      }
+
+      return !parametersAsStringList.Any() ? string.Empty : string.Join(",", parametersAsStringList);
+    }
+
+    public static string GetPropertyTypeString(Property property)
+    {
+      switch (property.PropertyType)
+      {
+        case PropertyType.Primitive:
+        {
+          return GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)property.PrimitiveType);
+        }
+        case PropertyType.Complex:
+        {
+          return property.ComplexType.Name;
+        }
+        case PropertyType.IEnumerable:
+        {
+          return "IEnumerable";
+        }
+        case PropertyType.IEnumerableT:
+        {
+          if (property.PrimitiveType != null)
+            return string.Format("IEnumerable<{0}>",GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)property.PrimitiveType));
+
+          return string.Format("IEnumerable<{0}>", property.ComplexType.Name);
+        }
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+  public static string GetPrimitiveTypeStringByPrimitiveType(PrimitiveType primitiveType)
+    {
+      switch (primitiveType)
+      {
+        case PrimitiveType.Bool:
+          return "bool";
+        case PrimitiveType.Char:
+          return "char";
+        case PrimitiveType.DateTime:
+          return "DateTime";
+        case PrimitiveType.Double:
+          return "double";
+        case PrimitiveType.Int:
+          return "int";
+        case PrimitiveType.String:
+          return "string";
+        case PrimitiveType.Unsupported:
+          return "UNKNOWN";
+        default:
+          return "UNKNOWN";
+      }
+    }
+
+  public static string GetClientClassName(string controllerName)
+    {
+      var controllers = new List<Controller>();
+
+      var methods = controllers.SelectMany(x => x.Methods).ToList();
+      var complexReturnTypes = methods.Where(x => x.ComplexType != null).Select(x => x.ComplexType).ToList();
+
+      foreach (var complexReturnType in complexReturnTypes)
+      {
+        //public class 
+
+        foreach (var property in complexReturnType.Properties)
+        {
+          
+        }
+      }
+
+
+      return controllerName.Replace("Controller", "Manager");
+    }
+  }
+
+#>

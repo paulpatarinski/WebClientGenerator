@@ -20,7 +20,7 @@ namespace WebApi.Models
 
         public string Email { get; set; }
 
-        public IEnumerable<UserLoginInfoViewModel> Logins { get; set; }
+        //public IEnumerable<UserLoginInfoViewModel> Logins { get; set; }
 
         public IEnumerable<ExternalLoginViewModel> ExternalLoginProviders { get; set; }
     }

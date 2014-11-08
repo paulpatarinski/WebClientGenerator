@@ -114,7 +114,7 @@ namespace WebApi.Controllers
             {
                 LocalLoginProvider = LocalLoginProvider,
                 Email = user.UserName,
-                Logins = logins,
+                //Logins = logins,
                 ExternalLoginProviders = GetExternalLogins(returnUrl, generateState)
             };
         }

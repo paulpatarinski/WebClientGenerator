@@ -1,4 +1,5 @@
 *obj*
-packages/*
+ClientComponent/packages/*
+ServerComponent/packages/*
 *bin*
 *.userprefs

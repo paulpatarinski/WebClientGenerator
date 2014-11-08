@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebClientAutomator", "WebCl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebClientAutomatorTest", "WebClientAutomatorTest\WebClientAutomatorTest.csproj", "{06FEEB99-90F6-4740-8685-3D468CBEA24C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientTest", "ClientTest\ClientTest.csproj", "{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,16 +51,6 @@ Global
 		{06FEEB99-90F6-4740-8685-3D468CBEA24C}.Release|ARM.ActiveCfg = Release|Any CPU
 		{06FEEB99-90F6-4740-8685-3D468CBEA24C}.Release|x64.ActiveCfg = Release|Any CPU
 		{06FEEB99-90F6-4740-8685-3D468CBEA24C}.Release|x86.ActiveCfg = Release|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Release|ARM.ActiveCfg = Release|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Release|x64.ActiveCfg = Release|Any CPU
-		{8328D878-4FF9-4D00-AD90-C3CF38F47FF9}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

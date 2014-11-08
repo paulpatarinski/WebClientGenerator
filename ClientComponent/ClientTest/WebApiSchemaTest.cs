@@ -3,12 +3,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 
 namespace ClientTest
 {
   [TestClass]
-  public class UnitTest1
+  public class WebApiSchemaTest
   {
     [TestMethod]
     public async Task TestMethod1()

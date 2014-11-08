@@ -54,12 +54,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AccountManagerTest.cs" />
     <Compile Include="t4\WebApiClientGenerator.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>WebApiClientGenerator.tt</DependentUpon>
     </Compile>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="WebApiSchemaTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

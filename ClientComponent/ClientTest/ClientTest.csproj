@@ -54,24 +54,21 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AccountManagerTest.cs" />
-    <Compile Include="t4\WebApiClientGenerator.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>WebApiClientGenerator.tt</DependentUpon>
-    </Compile>
+    <Compile Include="StudentManagerTest.cs" />
     <Compile Include="WebApiSchemaTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="t4\WebApiClientGenerator.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>WebApiClientGenerator.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Client\Client.csproj">
+      <Project>{996CC0A5-1FE2-424D-9BA1-0D5799DC55BD}</Project>
+      <Name>Client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -1,90 +1,141 @@
 ﻿
+	using System;
 	using System.Collections.Generic;
+	using System.Net.Http;
+	using System.Net.Http.Headers;
 	using System.Threading.Tasks;
 	using Newtonsoft.Json;
 
-	namespace WebApiClients
+	namespace WebApiClient
 	{
+		public class HttpClientService
+		{
+      private const string BASE_URL = "http://localhost:49515/api/";
+
+			public static async Task<string> GetAsync(string controllerName, string actionName)
+			{
+				var result = string.Empty;
+
+				using (var client = new HttpClient())
+				{
+					client.BaseAddress = new Uri(string.Format(BASE_URL + "{0}/", controllerName));
+					client.DefaultRequestHeaders.Accept.Clear();
+					client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+					var response = await client.GetAsync(actionName);
+
+					if (response.IsSuccessStatusCode)
+					{
+						result = await response.Content.ReadAsStringAsync();
+					}
+				}
+
+				return result;
+			}
+		}
+
 			public class AccountManager
 		{
 
-								public UserInfoViewModel GetUserInfo()
+								public async Task<UserInfoViewModel> GetUserInfo()
 					{
 						
-						return JsonConvert.DeserializeObject<UserInfoViewModel>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "GetUserInfo");
+
+						return JsonConvert.DeserializeObject<UserInfoViewModel>(stringResult);
 						
 
 											}		
-								public string Logout()
+								public async Task<string> Logout()
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "Logout");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public void VoidMethodExample()
+								public async Task VoidMethodExample()
 					{
 											}		
-								public ManageInfoViewModel GetManageInfo(string returnUrl,bool generateState)
+								public async Task<ManageInfoViewModel> GetManageInfo(string returnUrl,bool generateState)
 					{
 						
-						return JsonConvert.DeserializeObject<ManageInfoViewModel>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "GetManageInfo");
+
+						return JsonConvert.DeserializeObject<ManageInfoViewModel>(stringResult);
 						
 
 											}		
-								public string ChangePassword(ChangePasswordBindingModel model)
+								public async Task<string> ChangePassword(ChangePasswordBindingModel model)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "ChangePassword");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public string SetPassword(SetPasswordBindingModel model)
+								public async Task<string> SetPassword(SetPasswordBindingModel model)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "SetPassword");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public string AddExternalLogin(AddExternalLoginBindingModel model)
+								public async Task<string> AddExternalLogin(AddExternalLoginBindingModel model)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "AddExternalLogin");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public string RemoveLogin(RemoveLoginBindingModel model)
+								public async Task<string> RemoveLogin(RemoveLoginBindingModel model)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "RemoveLogin");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public string GetExternalLogin(string provider,string error)
+								public async Task<string> GetExternalLogin(string provider,string error)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "GetExternalLogin");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public IEnumerable<ExternalLoginViewModel> GetExternalLogins(string returnUrl,bool generateState)
+								public async Task<IEnumerable<ExternalLoginViewModel>> GetExternalLogins(string returnUrl,bool generateState)
 					{
 						
-						return JsonConvert.DeserializeObject<IEnumerable<ExternalLoginViewModel>>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "GetExternalLogins");
+
+						return JsonConvert.DeserializeObject<IEnumerable<ExternalLoginViewModel>>(stringResult);
 						
 
 											}		
-								public string Register(RegisterBindingModel model)
+								public async Task<string> Register(RegisterBindingModel model)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "Register");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public string RegisterExternal(RegisterExternalBindingModel model)
+								public async Task<string> RegisterExternal(RegisterExternalBindingModel model)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("AccountController", "RegisterExternal");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
@@ -94,27 +145,31 @@
 			public class ValuesManager
 		{
 
-								public IEnumerable<string> Get()
+								public async Task<IEnumerable<string>> Get()
 					{
 						
-						return JsonConvert.DeserializeObject<IEnumerable<string>>("");
+						var stringResult = await HttpClientService.GetAsync("ValuesController", "Get");
+
+						return JsonConvert.DeserializeObject<IEnumerable<string>>(stringResult);
 						
 
 											}		
-								public string Get(int id)
+								public async Task<string> Get(int id)
 					{
 						
-						return JsonConvert.DeserializeObject<string>("");
+						var stringResult = await HttpClientService.GetAsync("ValuesController", "Get");
+
+						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
 											}		
-								public void Post(string value)
+								public async Task Post(string value)
 					{
 											}		
-								public void Put(int id,string value)
+								public async Task Put(int id,string value)
 					{
 											}		
-								public void Delete(int id)
+								public async Task Delete(int id)
 					{
 											}		
 				
@@ -224,10 +279,6 @@
 
 				
 				public string Email { get; set; }
-
-
-				
-				public IEnumerable<UserLoginInfoViewModel> Logins { get; set; }
 
 
 				

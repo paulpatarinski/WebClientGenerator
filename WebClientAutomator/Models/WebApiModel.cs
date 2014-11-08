@@ -73,7 +73,7 @@ namespace WebClientAutomator.Models
 
   public static class SchemaHelper
   {
-    public static string GetReturnTypeString(Method method)
+    public static string GetReturnTypeString(Method method, bool applyPrefix = false)
     {
       switch (method.ReturnType)
       {
@@ -88,7 +88,12 @@ namespace WebClientAutomator.Models
         case MethodReturnType.IEnumerable:
           return "IEnumerable";
         case MethodReturnType.Task:
-          return "async Task";
+        {
+          if(applyPrefix)
+            return "async Task";
+
+          return string.Empty;
+        }
         case MethodReturnType.IEnumerableT:
         {
           if (method.PrimitiveType != null)
@@ -99,23 +104,37 @@ namespace WebClientAutomator.Models
                 Name = method.Name,
                 PrimitiveType = method.PrimitiveType,
                 ReturnType = MethodReturnType.Primitive
-              }));
+              }, applyPrefix));
 
           return string.Format("IEnumerable<{0}>", method.ComplexType.Name);
         }
         case MethodReturnType.TaskT:
         {
-          if (method.PrimitiveType != null)
-            return string.Format("async Task<{0}>",
-              GetReturnTypeString(new Method
-              {
-                ComplexType = method.ComplexType,
-                Name = method.Name,
-                PrimitiveType = method.PrimitiveType,
-                ReturnType = MethodReturnType.Primitive
-              }));
+          if (applyPrefix)
+          {
+            if (method.PrimitiveType != null)
+              return string.Format("async Task<{0}>",
+                GetReturnTypeString(new Method
+                {
+                  ComplexType = method.ComplexType,
+                  Name = method.Name,
+                  PrimitiveType = method.PrimitiveType,
+                  ReturnType = MethodReturnType.Primitive
+                }, applyPrefix));
 
-          return string.Format("async Task<{0}>", method.ComplexType.Name);
+            return string.Format("async Task<{0}>", method.ComplexType.Name);
+          }
+          
+          if (method.PrimitiveType != null)
+            return GetReturnTypeString(new Method
+            {
+              ComplexType = method.ComplexType,
+              Name = method.Name,
+              PrimitiveType = method.PrimitiveType,
+              ReturnType = MethodReturnType.Primitive
+            });
+
+          return method.ComplexType.Name;
         }
         case MethodReturnType.ComplexType:
           return method.ComplexType.Name;
@@ -142,6 +161,7 @@ namespace WebClientAutomator.Models
 
     public static string GetClassIniatializerByReturnType(MethodReturnType returnType)
     {
+      //todo : need to add support for more types
       switch (returnType)
       {
           case MethodReturnType.Void:
@@ -151,6 +171,8 @@ namespace WebClientAutomator.Models
 
 
       }
+
+      return null;
     }
 
     public static string GetPropertyTypeString(Property property)

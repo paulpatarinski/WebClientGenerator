@@ -1,6 +1,7 @@
 ﻿
 	using System.Collections.Generic;
 	using System.Threading.Tasks;
+	using Newtonsoft.Json;
 
 	namespace WebApiClients
 	{
@@ -10,92 +11,81 @@
 								public UserInfoViewModel GetUserInfo()
 					{
 						
-						var result = new UserInfoViewModel();
+						return JsonConvert.DeserializeObject<UserInfoViewModel>("");
 						
-						return result;
 
 											}		
 								public string Logout()
 					{
 						
-						var result = new string();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
 								public void VoidMethodExample()
 					{
 											}		
-								public async Task<ManageInfoViewModel> GetManageInfo(string returnUrl,bool generateState)
+								public ManageInfoViewModel GetManageInfo(string returnUrl,bool generateState)
 					{
 						
-						var result = new async Task<ManageInfoViewModel>();
+						return JsonConvert.DeserializeObject<ManageInfoViewModel>("");
 						
-						return result;
 
 											}		
-								public async Task<string> ChangePassword(ChangePasswordBindingModel model)
+								public string ChangePassword(ChangePasswordBindingModel model)
 					{
 						
-						var result = new async Task<string>();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
-								public async Task<string> SetPassword(SetPasswordBindingModel model)
+								public string SetPassword(SetPasswordBindingModel model)
 					{
 						
-						var result = new async Task<string>();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
-								public async Task<string> AddExternalLogin(AddExternalLoginBindingModel model)
+								public string AddExternalLogin(AddExternalLoginBindingModel model)
 					{
 						
-						var result = new async Task<string>();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
-								public async Task<string> RemoveLogin(RemoveLoginBindingModel model)
+								public string RemoveLogin(RemoveLoginBindingModel model)
 					{
 						
-						var result = new async Task<string>();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
-								public async Task<string> GetExternalLogin(string provider,string error)
+								public string GetExternalLogin(string provider,string error)
 					{
 						
-						var result = new async Task<string>();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
 								public IEnumerable<ExternalLoginViewModel> GetExternalLogins(string returnUrl,bool generateState)
 					{
 						
-						var result = new IEnumerable<ExternalLoginViewModel>();
+						return JsonConvert.DeserializeObject<IEnumerable<ExternalLoginViewModel>>("");
 						
-						return result;
 
 											}		
-								public async Task<string> Register(RegisterBindingModel model)
+								public string Register(RegisterBindingModel model)
 					{
 						
-						var result = new async Task<string>();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
-								public async Task<string> RegisterExternal(RegisterExternalBindingModel model)
+								public string RegisterExternal(RegisterExternalBindingModel model)
 					{
 						
-						var result = new async Task<string>();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
 				
@@ -107,17 +97,15 @@
 								public IEnumerable<string> Get()
 					{
 						
-						var result = new IEnumerable<string>();
+						return JsonConvert.DeserializeObject<IEnumerable<string>>("");
 						
-						return result;
 
 											}		
 								public string Get(int id)
 					{
 						
-						var result = new string();
+						return JsonConvert.DeserializeObject<string>("");
 						
-						return result;
 
 											}		
 								public void Post(string value)

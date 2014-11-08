@@ -18,6 +18,7 @@
 	#>
 	using System.Collections.Generic;
 	using System.Threading.Tasks;
+	using Newtonsoft.Json;
 
 	namespace WebApiClients
 	{
@@ -32,6 +33,7 @@
 			<# foreach(var method in controller.Methods)
 			{
 				var returnType = SchemaHelper.GetReturnTypeString(method);
+				var returnTypeNoPrefix = SchemaHelper.GetReturnTypeString(method, false);
 				var parameters = SchemaHelper.GetParametersString(method.Parameters);
 			#>
 					public <#=returnType#> <#=method.Name#>(<#=parameters#>)
@@ -39,9 +41,8 @@
 						<#if(method.ReturnType != MethodReturnType.Void)
 						{#>
 
-						var result = new <#=returnType#>();
+						return JsonConvert.DeserializeObject<<#=returnTypeNoPrefix#>>("");
 						
-						return result;
 
 						<#}#>
 					}		
@@ -100,25 +101,31 @@ public WebApiModel GetWebApiSchema()
 
   using (var client = new HttpClient())
   {
-    client.BaseAddress = new Uri("http://localhost:49515/");
-    client.DefaultRequestHeaders.Accept.Clear();
-    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+		try
+		{
+			client.BaseAddress = new Uri("http://localhost:49515/");
+			client.DefaultRequestHeaders.Accept.Clear();
+			client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-    // New code:
-    var responseTask = client.GetAsync("api/WebApiSchema/Schema");
+			// New code:
+			var responseTask = client.GetAsync("api/WebApiSchema/Schema");
 
-    responseTask.Wait();
+			responseTask.Wait();
 
-    if (responseTask.Result.IsSuccessStatusCode)
-    {
-      var stringResultTask = responseTask.Result.Content.ReadAsStringAsync();
+			if (responseTask.Result.IsSuccessStatusCode)
+			{
+				var stringResultTask = responseTask.Result.Content.ReadAsStringAsync();
 
-      stringResultTask.Wait();
+				stringResultTask.Wait();
 
-      result = JsonConvert.DeserializeObject<WebApiModel>(stringResultTask.Result);
-
-      //var hello = "";
-    }
+				result = JsonConvert.DeserializeObject<WebApiModel>(stringResultTask.Result);
+			}
+		}
+		catch(Exception ex)
+		{
+			throw new Exception("Error retrieving the Web Api schema",ex);
+		}
+   
   }
 
   return result;
@@ -193,7 +200,7 @@ public WebApiModel GetWebApiSchema()
 
  public static class SchemaHelper
   {
-    public static string GetReturnTypeString(Method method)
+      public static string GetReturnTypeString(Method method, bool applyPrefix = false)
     {
       switch (method.ReturnType)
       {
@@ -208,7 +215,12 @@ public WebApiModel GetWebApiSchema()
         case MethodReturnType.IEnumerable:
           return "IEnumerable";
         case MethodReturnType.Task:
-          return "async Task";
+        {
+          if(applyPrefix)
+            return "async Task";
+
+          return string.Empty;
+        }
         case MethodReturnType.IEnumerableT:
         {
           if (method.PrimitiveType != null)
@@ -219,23 +231,37 @@ public WebApiModel GetWebApiSchema()
                 Name = method.Name,
                 PrimitiveType = method.PrimitiveType,
                 ReturnType = MethodReturnType.Primitive
-              }));
+              }, applyPrefix));
 
           return string.Format("IEnumerable<{0}>", method.ComplexType.Name);
         }
         case MethodReturnType.TaskT:
         {
-          if (method.PrimitiveType != null)
-            return string.Format("async Task<{0}>",
-              GetReturnTypeString(new Method
-              {
-                ComplexType = method.ComplexType,
-                Name = method.Name,
-                PrimitiveType = method.PrimitiveType,
-                ReturnType = MethodReturnType.Primitive
-              }));
+          if (applyPrefix)
+          {
+            if (method.PrimitiveType != null)
+              return string.Format("async Task<{0}>",
+                GetReturnTypeString(new Method
+                {
+                  ComplexType = method.ComplexType,
+                  Name = method.Name,
+                  PrimitiveType = method.PrimitiveType,
+                  ReturnType = MethodReturnType.Primitive
+                }, applyPrefix));
 
-          return string.Format("async Task<{0}>", method.ComplexType.Name);
+            return string.Format("async Task<{0}>", method.ComplexType.Name);
+          }
+          
+          if (method.PrimitiveType != null)
+            return GetReturnTypeString(new Method
+            {
+              ComplexType = method.ComplexType,
+              Name = method.Name,
+              PrimitiveType = method.PrimitiveType,
+              ReturnType = MethodReturnType.Primitive
+            });
+
+          return method.ComplexType.Name;
         }
         case MethodReturnType.ComplexType:
           return method.ComplexType.Name;

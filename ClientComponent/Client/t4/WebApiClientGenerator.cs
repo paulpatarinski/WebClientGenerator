@@ -5,24 +5,72 @@
 	using System.Net.Http.Headers;
 	using System.Threading.Tasks;
 	using Newtonsoft.Json;
+	using Tavis.UriTemplates;
 
 	namespace WebApiClient
 	{
+
+	 public static class ObjectExtensions
+	  {
+      /// <summary>
+      /// http://stackoverflow.com/questions/1749966/c-sharp-how-to-determine-whether-a-type-is-a-number
+      /// </summary>
+      /// <param name="obj"></param>
+      /// <returns></returns>
+      public static bool IsNumericType(this object obj)
+      {
+        switch (Type.GetTypeCode(obj.GetType()))
+        {
+          case TypeCode.Byte:
+          case TypeCode.SByte:
+          case TypeCode.UInt16:
+          case TypeCode.UInt32:
+          case TypeCode.UInt64:
+          case TypeCode.Int16:
+          case TypeCode.Int32:
+          case TypeCode.Int64:
+          case TypeCode.Decimal:
+          case TypeCode.Double:
+          case TypeCode.Single:
+            return true;
+          default:
+            return false;
+        }
+      }
+	  }
+
 		public class HttpClientService
 		{
       private const string BASE_URL = "http://localhost:49515/api/";
 
-			public static async Task<string> GetAsync(string controllerName, string actionName)
+			public static async Task<string> GetAsync(string controllerName, string actionName, Dictionary<string,object> args = null)
 			{
 				var result = string.Empty;
 
 				using (var client = new HttpClient())
 				{
-					client.BaseAddress = new Uri(string.Format(BASE_URL + "{0}/", controllerName));
+					UriTemplate uriTemplate;
+
+				  if (args != null)
+				  {
+            uriTemplate = new UriTemplate(string.Format(BASE_URL + "{0}/{1}{2}", controllerName,actionName, "{?" + String.Join(",",args.Keys) + "}"));
+
+				    foreach (var arg in args)
+				    {
+				      var value = arg.Value.IsNumericType() ? arg.Value.ToString() : arg.Value;
+
+				      uriTemplate.SetParameter(arg.Key, value);
+				    }
+				  }
+				  else
+				  {
+				   uriTemplate = new UriTemplate(string.Format(BASE_URL + "{0}", controllerName));
+				  }
+
 					client.DefaultRequestHeaders.Accept.Clear();
 					client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-					var response = await client.GetAsync(actionName);
+					var response = await client.GetAsync(uriTemplate.Resolve());
 
 					if (response.IsSuccessStatusCode)
 					{
@@ -34,14 +82,36 @@
 			}
 		}
 
+			public class AaronManager
+		{
+
+								public async Task<Monkey> GetMonkeysByQuery(GetMonkeysByNameQuery query)
+					{
+						
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("query", query);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Aaron", "GetMonkeysByQuery", args);
+						
+						return JsonConvert.DeserializeObject<Monkey>(stringResult);
+						
+
+											}		
+				
+		}
+
 			public class AccountManager
 		{
 
 								public async Task<UserInfoViewModel> GetUserInfo()
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "GetUserInfo");
-
+													var stringResult = await HttpClientService.GetAsync("Account", "GetUserInfo");
+						
+						
 						return JsonConvert.DeserializeObject<UserInfoViewModel>(stringResult);
 						
 
@@ -49,8 +119,9 @@
 								public async Task<string> Logout()
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "Logout");
-
+													var stringResult = await HttpClientService.GetAsync("Account", "Logout");
+						
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -61,8 +132,17 @@
 								public async Task<ManageInfoViewModel> GetManageInfo(string returnUrl,bool generateState)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "GetManageInfo");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("returnUrl", returnUrl);
+							
+							
+								args.Add("generateState", generateState);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "GetManageInfo", args);
+						
 						return JsonConvert.DeserializeObject<ManageInfoViewModel>(stringResult);
 						
 
@@ -70,8 +150,14 @@
 								public async Task<string> ChangePassword(ChangePasswordBindingModel model)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "ChangePassword");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("model", model);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "ChangePassword", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -79,8 +165,14 @@
 								public async Task<string> SetPassword(SetPasswordBindingModel model)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "SetPassword");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("model", model);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "SetPassword", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -88,8 +180,14 @@
 								public async Task<string> AddExternalLogin(AddExternalLoginBindingModel model)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "AddExternalLogin");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("model", model);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "AddExternalLogin", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -97,8 +195,14 @@
 								public async Task<string> RemoveLogin(RemoveLoginBindingModel model)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "RemoveLogin");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("model", model);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "RemoveLogin", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -106,8 +210,17 @@
 								public async Task<string> GetExternalLogin(string provider,string error)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "GetExternalLogin");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("provider", provider);
+							
+							
+								args.Add("error", error);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "GetExternalLogin", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -115,8 +228,17 @@
 								public async Task<IEnumerable<ExternalLoginViewModel>> GetExternalLogins(string returnUrl,bool generateState)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "GetExternalLogins");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("returnUrl", returnUrl);
+							
+							
+								args.Add("generateState", generateState);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "GetExternalLogins", args);
+						
 						return JsonConvert.DeserializeObject<IEnumerable<ExternalLoginViewModel>>(stringResult);
 						
 
@@ -124,8 +246,14 @@
 								public async Task<string> Register(RegisterBindingModel model)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "Register");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("model", model);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "Register", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -133,9 +261,61 @@
 								public async Task<string> RegisterExternal(RegisterExternalBindingModel model)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Account", "RegisterExternal");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("model", model);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Account", "RegisterExternal", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
+						
+
+											}		
+				
+		}
+
+			public class CompanyManager
+		{
+
+								public async Task<IEnumerable<Company>> GetCompanies()
+					{
+						
+													var stringResult = await HttpClientService.GetAsync("Company", "GetCompanies");
+						
+						
+						return JsonConvert.DeserializeObject<IEnumerable<Company>>(stringResult);
+						
+
+											}		
+								public async Task<Company> GetCompanyByCode(string companyCode)
+					{
+						
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("companyCode", companyCode);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Company", "GetCompanyByCode", args);
+						
+						return JsonConvert.DeserializeObject<Company>(stringResult);
+						
+
+											}		
+								public async Task<Company> GetCompanyByQuery(CompanyQuery query)
+					{
+						
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("query", query);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Company", "GetCompanyByQuery", args);
+						
+						return JsonConvert.DeserializeObject<Company>(stringResult);
 						
 
 											}		
@@ -145,12 +325,18 @@
 			public class StudentManager
 		{
 
-								public async Task<Student> GetStudent()
+								public async Task<IEnumerable<Student>> GetStudentByIds(IEnumerable<int> ids)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Student", "GetStudent");
-
-						return JsonConvert.DeserializeObject<Student>(stringResult);
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("ids", ids);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Student", "GetStudentByIds", args);
+						
+						return JsonConvert.DeserializeObject<IEnumerable<Student>>(stringResult);
 						
 
 											}		
@@ -163,8 +349,9 @@
 								public async Task<IEnumerable<string>> Get()
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Values", "Get");
-
+													var stringResult = await HttpClientService.GetAsync("Values", "Get");
+						
+						
 						return JsonConvert.DeserializeObject<IEnumerable<string>>(stringResult);
 						
 
@@ -172,8 +359,14 @@
 								public async Task<string> Get(int id)
 					{
 						
-						var stringResult = await HttpClientService.GetAsync("Values", "Get");
-
+													var args = new Dictionary<string,object>();
+							
+							
+								args.Add("id", id);
+							
+														
+							var stringResult = await HttpClientService.GetAsync("Values", "Get", args);
+						
 						return JsonConvert.DeserializeObject<string>(stringResult);
 						
 
@@ -190,7 +383,24 @@
 				
 		}
 
-					public class ChangePasswordBindingModel
+					public class GetMonkeysByNameQuery
+				{
+
+				
+				public string Name { get; set; }
+
+
+				
+				public int Type { get; set; }
+
+
+				
+				public Student Student { get; set; }
+
+
+								}
+
+						public class ChangePasswordBindingModel
 				{
 
 				
@@ -268,6 +478,32 @@
 
 								}
 
+						public class CompanyQuery
+				{
+
+				
+				public string Code { get; set; }
+
+
+				
+				public string Name { get; set; }
+
+
+								}
+
+						public class Monkey
+				{
+
+				
+				public string Name { get; set; }
+
+
+				
+				public int Type { get; set; }
+
+
+								}
+
 						public class UserInfoViewModel
 				{
 
@@ -315,6 +551,19 @@
 
 				
 				public string State { get; set; }
+
+
+								}
+
+						public class Company
+				{
+
+				
+				public string CompanyCode { get; set; }
+
+
+				
+				public string CompanyName { get; set; }
 
 
 								}

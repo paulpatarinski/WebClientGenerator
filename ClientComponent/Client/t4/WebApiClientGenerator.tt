@@ -1,7 +1,7 @@
 ﻿<#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ assembly name="System.Net.Http" #>
-<#@ assembly name="$(ProjectDir)..\packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll" #>
+<#@ assembly name="$(ProjectDir)..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
@@ -24,24 +24,72 @@
 	using System.Net.Http.Headers;
 	using System.Threading.Tasks;
 	using Newtonsoft.Json;
+	using Tavis.UriTemplates;
 
 	namespace WebApiClient
 	{
+
+	 public static class ObjectExtensions
+	  {
+      /// <summary>
+      /// http://stackoverflow.com/questions/1749966/c-sharp-how-to-determine-whether-a-type-is-a-number
+      /// </summary>
+      /// <param name="obj"></param>
+      /// <returns></returns>
+      public static bool IsNumericType(this object obj)
+      {
+        switch (Type.GetTypeCode(obj.GetType()))
+        {
+          case TypeCode.Byte:
+          case TypeCode.SByte:
+          case TypeCode.UInt16:
+          case TypeCode.UInt32:
+          case TypeCode.UInt64:
+          case TypeCode.Int16:
+          case TypeCode.Int32:
+          case TypeCode.Int64:
+          case TypeCode.Decimal:
+          case TypeCode.Double:
+          case TypeCode.Single:
+            return true;
+          default:
+            return false;
+        }
+      }
+	  }
+
 		public class HttpClientService
 		{
       private const string BASE_URL = "<#=webApiBaseUrl #>";
 
-			public static async Task<string> GetAsync(string controllerName, string actionName)
+			public static async Task<string> GetAsync(string controllerName, string actionName, Dictionary<string,object> args = null)
 			{
 				var result = string.Empty;
 
 				using (var client = new HttpClient())
 				{
-					client.BaseAddress = new Uri(string.Format(BASE_URL + "{0}/", controllerName));
+					UriTemplate uriTemplate;
+
+				  if (args != null)
+				  {
+            uriTemplate = new UriTemplate(string.Format(BASE_URL + "{0}/{1}{2}", controllerName,actionName, "{?" + String.Join(",",args.Keys) + "}"));
+
+				    foreach (var arg in args)
+				    {
+				      var value = arg.Value.IsNumericType() ? arg.Value.ToString() : arg.Value;
+
+				      uriTemplate.SetParameter(arg.Key, value);
+				    }
+				  }
+				  else
+				  {
+				   uriTemplate = new UriTemplate(string.Format(BASE_URL + "{0}", controllerName));
+				  }
+
 					client.DefaultRequestHeaders.Accept.Clear();
 					client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-					var response = await client.GetAsync(actionName);
+					var response = await client.GetAsync(uriTemplate.Resolve());
 
 					if (response.IsSuccessStatusCode)
 					{
@@ -73,7 +121,27 @@
 						<#if(method.ReturnType != MethodReturnType.Void)
 						{#>
 
-						var stringResult = await HttpClientService.GetAsync("<#=controllerNameNoSuffix#>", "<#=method.Name#>");
+						<#if(method.Parameters.Any())
+						{
+							#>
+							var args = new Dictionary<string,object>();
+							
+							<#
+							foreach(var parameter in method.Parameters)
+							{ #>
+
+								args.Add("<#=parameter.Name#>", <#=parameter.Name#>);
+							
+							<#} #>
+							
+							var stringResult = await HttpClientService.GetAsync("<#=controllerNameNoSuffix#>", "<#=method.Name#>", args);
+						<#}
+						
+						else {
+						#>
+							var stringResult = await HttpClientService.GetAsync("<#=controllerNameNoSuffix#>", "<#=method.Name#>");
+						
+						<#}#>
 
 						return JsonConvert.DeserializeObject<<#=returnTypeNoPrefix#>>(stringResult);
 						
@@ -95,6 +163,7 @@
 	var complexTypes = new List<ComplexType>();
 	complexTypes.AddRange(parameterComplexTypes);
 	complexTypes.AddRange(complexReturnTypes);
+	complexTypes = complexTypes.GroupBy(complexType => complexType.Name).Select(grp => grp.First()).ToList();
 
 	foreach(var complexType in complexTypes)
 	{
@@ -348,13 +417,11 @@
     {
       var parametersAsStringList = new List<string>();
 
-      foreach (var paramater in paramaters)
+      foreach (var parameter in paramaters)
       {
-        var typeAsString = paramater.PrimitiveType != null
-          ? GetPrimitiveTypeStringByPrimitiveType((PrimitiveType)paramater.PrimitiveType)
-          : paramater.ComplexType.Name;
+				var typeAsString = GetPropertyTypeString(parameter);
 
-        parametersAsStringList.Add(string.Format("{0} {1}", typeAsString, paramater.Name));
+        parametersAsStringList.Add(string.Format("{0} {1}", typeAsString, parameter.Name));
       }
 
       return !parametersAsStringList.Any() ? string.Empty : string.Join(",", parametersAsStringList);

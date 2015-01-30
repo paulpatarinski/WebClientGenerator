@@ -82,27 +82,6 @@
 			}
 		}
 
-			public class AaronManager
-		{
-
-								public async Task<Monkey> GetMonkeysByQuery(GetMonkeysByNameQuery query)
-					{
-						
-													var args = new Dictionary<string,object>();
-							
-							
-								args.Add("query", query);
-							
-														
-							var stringResult = await HttpClientService.GetAsync("Aaron", "GetMonkeysByQuery", args);
-						
-						return JsonConvert.DeserializeObject<Monkey>(stringResult);
-						
-
-											}		
-				
-		}
-
 			public class AccountManager
 		{
 
@@ -289,7 +268,7 @@
 						
 
 											}		
-								public async Task<Company> GetCompanyByCode(string companyCode)
+								public async Task<Company> GetCompanyByCompanyCode(string companyCode)
 					{
 						
 													var args = new Dictionary<string,object>();
@@ -298,22 +277,7 @@
 								args.Add("companyCode", companyCode);
 							
 														
-							var stringResult = await HttpClientService.GetAsync("Company", "GetCompanyByCode", args);
-						
-						return JsonConvert.DeserializeObject<Company>(stringResult);
-						
-
-											}		
-								public async Task<Company> GetCompanyByQuery(CompanyQuery query)
-					{
-						
-													var args = new Dictionary<string,object>();
-							
-							
-								args.Add("query", query);
-							
-														
-							var stringResult = await HttpClientService.GetAsync("Company", "GetCompanyByQuery", args);
+							var stringResult = await HttpClientService.GetAsync("Company", "GetCompanyByCompanyCode", args);
 						
 						return JsonConvert.DeserializeObject<Company>(stringResult);
 						
@@ -325,18 +289,13 @@
 			public class StudentManager
 		{
 
-								public async Task<IEnumerable<Student>> GetStudentByIds(IEnumerable<int> ids)
+								public async Task<Student> GetStudent()
 					{
 						
-													var args = new Dictionary<string,object>();
-							
-							
-								args.Add("ids", ids);
-							
-														
-							var stringResult = await HttpClientService.GetAsync("Student", "GetStudentByIds", args);
+													var stringResult = await HttpClientService.GetAsync("Student", "GetStudent");
 						
-						return JsonConvert.DeserializeObject<IEnumerable<Student>>(stringResult);
+						
+						return JsonConvert.DeserializeObject<Student>(stringResult);
 						
 
 											}		
@@ -383,24 +342,7 @@
 				
 		}
 
-					public class GetMonkeysByNameQuery
-				{
-
-				
-				public string Name { get; set; }
-
-
-				
-				public int Type { get; set; }
-
-
-				
-				public Student Student { get; set; }
-
-
-								}
-
-						public class ChangePasswordBindingModel
+					public class ChangePasswordBindingModel
 				{
 
 				
@@ -474,32 +416,6 @@
 
 				
 				public string Email { get; set; }
-
-
-								}
-
-						public class CompanyQuery
-				{
-
-				
-				public string Code { get; set; }
-
-
-				
-				public string Name { get; set; }
-
-
-								}
-
-						public class Monkey
-				{
-
-				
-				public string Name { get; set; }
-
-
-				
-				public int Type { get; set; }
 
 
 								}

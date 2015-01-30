@@ -33,20 +33,20 @@ namespace ClientTest
     //  Assert.AreEqual(student.LastName, "Doe");
     //}
 
-    [TestMethod]
-    public async Task GetStudentByIds_ShouldReturnAStudentModels()
-    {
-      var studentManager = new StudentManager();
+    //[TestMethod]
+    //public async Task GetStudentByIds_ShouldReturnAStudentModels()
+    //{
+    //  var studentManager = new StudentManager();
 
-      var ids = new List<int> {123, 2332};
+    //  var ids = new List<int> {123, 2332};
 
-      var students = (await studentManager.GetStudentByIds(ids)).ToList();
+    //  var students = (await studentManager.GetStudentByIds(ids)).ToList();
 
-      Assert.AreEqual(students.Count, 2);
-      Assert.AreEqual(students[0].FirstName, "James");
-      Assert.AreEqual(students[0].LastName, "Doe");
-      Assert.AreEqual(students[1].FirstName, "Jane");
-      Assert.AreEqual(students[1].LastName, "Doe");
-    }
+    //  Assert.AreEqual(students.Count, 2);
+    //  Assert.AreEqual(students[0].FirstName, "James");
+    //  Assert.AreEqual(students[0].LastName, "Doe");
+    //  Assert.AreEqual(students[1].FirstName, "Jane");
+    //  Assert.AreEqual(students[1].LastName, "Doe");
+    //}
   }
 }

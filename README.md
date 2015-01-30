@@ -1,5 +1,5 @@
 # Web Client Generator
-A library that lets you generate clients for WebApi/MVC solutions.
+A library that lets you generate clients for WebApi/MVC solutions. Think of it like [WSDL](http://en.wikipedia.org/wiki/Web_Services_Description_Language) for WebApi/MVC.
 
 #Setup
 1. Add the Server Component to your WebAPI/MVC solution. 

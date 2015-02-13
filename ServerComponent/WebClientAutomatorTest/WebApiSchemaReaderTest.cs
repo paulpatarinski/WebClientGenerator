@@ -27,7 +27,7 @@ namespace WebClientAutomatorTest
       var webApiSchema = _webApiSchemaReader.GetWebApiSchema(_webApiAssembly);
 
       webApiSchema.Should().NotBeNull();
-      webApiSchema.Controllers.Count.Should().Be(2);
+      webApiSchema.Controllers.Count.Should().Be(4);
     }
 
     [Test]

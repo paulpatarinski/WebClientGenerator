@@ -1,7 +1,4 @@
-[![Build Status](http://simpleprodtc.cloudapp.net/app/rest/builds/buildType:id:WebApps_WebClientGenerator/statusIcon)]
-(http://simpleprodtc.cloudapp.net/viewType.html?buildTypeId=WebApps_WebClientGenerator&guest=1)
-
-# Web Client Generator
+# Web Client Generator [![Build Status](http://simpleprodtc.cloudapp.net/app/rest/builds/buildType:id:WebApps_WebClientGenerator/statusIcon)](http://simpleprodtc.cloudapp.net/viewType.html?buildTypeId=WebApps_WebClientGenerator&guest=1)
 A library that lets you generate clients for WebApi/MVC solutions. Think of it like [WSDL](http://en.wikipedia.org/wiki/Web_Services_Description_Language) for WebApi/MVC.
 
 #Setup

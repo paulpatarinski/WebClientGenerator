@@ -1,16 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tavis.UriTemplates;
-using WebApiClient;
+﻿using System.Threading.Tasks;
+using NUnit.Framework;
 
 namespace ClientTest
 {
-  [TestClass]
+  [TestFixture]
   public class StudentManagerTest
   {
-    [TestMethod]
+    [Test]
     public async Task GetStudent_ShouldReturnAStudentModel()
     {
       //var studentManager = new StudentManager();

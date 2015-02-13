@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using WebApiClient;
 
 namespace ClientTest
 {
-  [TestClass]
+  [TestFixture]
   public class CompanyManagerTest
   {
-    [TestMethod]
+    [Test]
     public async Task GetCompanies_ShouldReturnAListOfCompanies()
     {
       var companyManager = new CompanyManager();
@@ -22,7 +19,7 @@ namespace ClientTest
       Assert.IsTrue(companies.Any());
     }
 
-    [TestMethod]
+    [Test]
     public async Task GetCompanyByCompanyCode_ShouldReturnACompany_MatchingTheCompanyCode()
     {
       var companyManager = new CompanyManager();

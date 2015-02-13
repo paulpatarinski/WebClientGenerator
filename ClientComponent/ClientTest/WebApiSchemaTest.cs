@@ -2,14 +2,14 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace ClientTest
 {
-  [TestClass]
+  [TestFixture]
   public class WebApiSchemaTest
   {
-    [TestMethod]
+    [Test]
     public async Task TestMethod1()
     {
       var result = await GetAsync("WebApiSchema", "Schema");
